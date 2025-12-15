@@ -55,8 +55,12 @@ Examples
 * `now` = current time
 * `now - hh:mm` = current time to given time
 * `hh:mm - now` = given time to current time
-* `hh:mm ++` = given time to next block start time
-* `-- hh:mm` = previous block end time to given time
+* `hh:mm ...` = given time to next block start time
+* `... hh:mm` = previous block end time to given time
+* `... <TimeDuration>` = previous block end time + 
+  duration
+* `<TimeDuration> ...` = previous block end time - 
+  duration
 * `full` = all day
 * `<Time?> + <TimeDuration>` = given time plus duration.
   if time is omitted, "now" is used.

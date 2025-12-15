@@ -2,21 +2,23 @@
 ####################### Makefile Template ##############################
 ########################################################################
 
-# Compiler settings - Can be customized.
-CC = gcc
-CXXFLAGS = -std=c11 -Wall -Werror
-LDFLAGS = 
-
 # Makefile settings - Can be customized.
-APPNAME = myapp
+APPNAME = timeflow
 EXT = .c
 SRCDIR = src
-OBJDIR = .
+LIBDIR = src/lib
+OBJDIR = obj
+INCLUDE = src/include
+
+# Compiler settings - Can be customized.
+CC = gcc
+CXXFLAGS = -std=c11 -Wall -I$(INCLUDE)
+LDFLAGS = 
 
 ############## Do not change anything from here downwards! #############
-SRC = $(wildcard $(SRCDIR)/*$(EXT))
+SRC = $(wildcard $(SRCDIR)/*$(EXT)) $(wildcard $(LIBDIR)/*$(EXT))
 OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
-DEP = $(OBJ:$(OBJDIR)/%.o=%.d)
+DEP = $(OBJ:$(OBJDIR)/%.o=$(OBJDIR)/%.d)
 # UNIX-based OS variables & settings
 RM = rm
 DELOBJ = $(OBJ)
