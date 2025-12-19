@@ -6,7 +6,7 @@ make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --quest
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Dec 11 21:36:17 2025
+# Make data base, printed on Fri Dec 19 14:19:53 2025
 
 # Variables
 
@@ -51,7 +51,7 @@ MAKE_COMMAND := make.exe
 # automatic
 @D = $(patsubst %/,%,$(patsubst %\,%,$(dir $@)))
 # environment
-CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_5104_WPKGEVLMSTWKCWDM
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_3456_MTRYIQPWFBXTOBTX
 # environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
@@ -59,19 +59,19 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
 %D = $(patsubst %/,%,$(patsubst %\,%,$(dir $%)))
 # environment
-TOCD = E:\home\main\projects
+TOCD = E:\home\main\projects\timeflow
 # automatic
 ^D = $(patsubst %/,%,$(patsubst %\,%,$(dir $^)))
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = C:\Users\pr0n3o\AppData\Roaming\Code\CachedData\7d842fb85a0275a4a8e4d7e040d2625abbf7f084
+VSCODE_CODE_CACHE_PATH = C:\Users\pr0n3o\AppData\Roaming\Code\CachedData\618725e67565b290ba4da6fe2d29f8fa1d4e3622
 # environment
 TERM_PROMPT_UNAME = pr0n3o
 # environment
 LANG = C
 # environment
-TOTALCD = E:/home/main/projects
+TOTALCD = E:/home/main/projects/timeflow
 # default
 .LOADED := 
 # environment
@@ -107,7 +107,7 @@ MAKEFILE_LIST := Makefile
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 5104
+VSCODE_PID = 3456
 # makefile (from 'Makefile', line 6)
 APPNAME = timeflow
 # automatic
@@ -159,7 +159,7 @@ PROMPT = [92mpr0n3o@winux[0m:[96mE:/home/main/projects/timeflow[0m$$$S
 # environment
 APPLICATION_INSIGHTS_NO_STATSBEAT = true
 # environment
-WT_SESSION = 2bd921c3-1b1d-4a5b-860e-766ce5a65282
+WT_SESSION = a28e52c6-19fb-4470-8758-02fce46cb696
 # environment
 LOGONSERVER = \\WINUX
 # environment
@@ -174,8 +174,6 @@ PROGRAMW6432 = C:\Program Files
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 # automatic
 +F = $(notdir $+)
-# environment
-ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
 USERDOMAIN = WINUX
 # 'override' directive
@@ -219,13 +217,13 @@ COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
 # environment
 TERM_PROMPT_PCNAME = winux
 # environment
-_STR = E:/home/main/projects/timeflow
+_STR = pr0n3o
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
 TEMP = C:\Users\pr0n3o\AppData\Local\Temp
 # environment
-VSCODE_IPC_HOOK = \\.\pipe\c29e8353-1.105.1-main-sock
+VSCODE_IPC_HOOK = \\.\pipe\c29e8353-1.107.0-main-sock
 # makefile (from 'Makefile', line 8)
 SRCDIR = src
 # default
@@ -245,7 +243,7 @@ VSCODE_CLI = 1
 # environment
 ELECTRON_NO_ATTACH_CONSOLE = 1
 # makefile (from 'Makefile', line 15)
-CXXFLAGS = -std=c11 -Wall -Werror -I$(INCLUDE)
+CXXFLAGS = -std=c11 -Wall -I$(INCLUDE)
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs notintermediate shell-export archives jobserver output-sync dospaths
 # environment
@@ -257,10 +255,9 @@ VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 DPATHMACRO = for /f "tokens=* USEBACKQ" %f IN (`w2ldir %_str%`) do (set _str=%f)
 # environment
-PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 58 Steppi 
-ng 9, GenuineIntel
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 58 Stepping 9, GenuineIntel
 # variable set hash-table stats:
-# Load=124/1024=12%, Rehash=0, Collisions=11/184=6%
+# Load=123/1024=12%, Rehash=0, Collisions=11/182=6%
 
 # Pattern-specific Variable Values
 
@@ -272,8 +269,7 @@ ng 9, GenuineIntel
 # . (key e:/home/main/projects/timeflow, mtime 1765291530): 12 files, no impossibilities.
 # obj/src (key (null), mtime 0): No files, 1 impossibilities.
 # obj/lib/src (key (null), mtime 0): No files, 1 impossibilities.
-# s 
-rc/lib (key e:/home/main/projects/timeflow/src/lib, mtime 1765364404): 3 files, no impossibilities.
+# src/lib (key e:/home/main/projects/timeflow/src/lib, mtime 1765364404): 3 files, no impossibilities.
 
 # 21 files, 2 impossibilities in 5 directories.
 
@@ -307,38 +303,38 @@ cleandepw:
 
 timeflow: obj/main.o obj/lib/parser.o
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
 #  File does not exist.
 #  File has been updated.
 #  Needs to be updated (-q is set).
-# automatic
-# @ := timeflow
-# automatic
-# * := 
-# automatic
-# < := obj/main.o
-# automatic
-# + := obj/main.o obj/lib/parser.o
-# automatic
-# % := 
-# automatic
-# ^ := obj/main.o obj/lib/parser.o
-# automatic
-# ? := obj/main.o obj/lib/parser.o
-# automatic
-# | := 
 # variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=2/17=12%
+# Load=0/32=0%, Rehash=0, Collisions=0/6=0%
 #  recipe to execute (from 'Makefile', line 38):
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 obj/main.o: src/main.c
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'main'
-#  File is secondary (prerequisite of .SECONDARY).
-#  Last modified 2025-12-10 22:22:22
+#  Last modified 2025-12-14 22:20:12
 #  File has been updated.
-#  Successfully updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := obj/main.o
+# automatic
+# * := main
+# automatic
+# < := src/main.c
+# automatic
+# + := src/main.c
+# automatic
+# % := 
+# automatic
+# ^ := src/main.c
+# automatic
+# ? := src/main.c
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/16=12%
 #  recipe to execute (from 'Makefile', line 49):
 	$(CC) $(CXXFLAGS) -o $@ -c $<
 
@@ -354,7 +350,7 @@ cleandep:
 Makefile:
 #  Implicit rule search has been done.
 #  File is secondary (prerequisite of .SECONDARY).
-#  Last modified 2025-12-10 18:05:08
+#  Last modified 2025-12-14 22:13:58
 #  File has been updated.
 #  Successfully updated.
 
@@ -370,15 +366,7 @@ clean:
 src/main.c:
 #  Implicit rule search has been done.
 #  File is secondary (prerequisite of .SECONDARY).
-#  Last modified 2025-12-10 17:52:26
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-src/lib/parser.c:
-#  Implicit rule search has been done.
-#  File is secondary (prerequisite of .SECONDARY).
-#  Last modified 2025-12-10 22:16:12
+#  Last modified 2025-12-19 12:50:20
 #  File has been updated.
 #  Successfully updated.
 
@@ -388,15 +376,11 @@ src/lib/parser.c:
 #  Modification time never checked.
 #  File has not been updated.
 
-obj/lib/parser.o: src/lib/parser.c
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'lib/parser'
-#  File is secondary (prerequisite of .SECONDARY).
-#  Last modified 2025-12-10 22:22:22
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 49):
-	$(CC) $(CXXFLAGS) -o $@ -c $<
+# Not a target:
+obj/lib/parser.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 all: timeflow
 #  Command line target.
@@ -405,7 +389,7 @@ all: timeflow
 #  File has been updated.
 #  Needs to be updated (-q is set).
 # variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/7=0%
+# Load=0/32=0%, Rehash=0, Collisions=0/6=0%
 
 cleanw:
 #  Phony target (prerequisite of .PHONY).
@@ -422,31 +406,25 @@ obj/lib/parser.d:
 #  File has been updated.
 #  Failed to be updated.
 
-# Not a target:
-.SUFFIXES:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
 .PHONY: clean cleandep cleanw cleandepw
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # files hash-table stats:
-# Load=16/1024=2%, Rehash=0, Collisions=0/56=0%
+# Load=15/1024=1%, Rehash=0, Collisions=0/51=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 42 / storage = 369 B / avg = 8 B
-# current buf: size = 8162 B / used = 369 B / count = 42 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 40 / storage = 341 B / avg = 8 B
+# current buf: size = 8162 B / used = 341 B / count = 40 / avg = 8 B
 
-# strcache performance: lookups = 79 / hit rate = 46%
+# strcache performance: lookups = 75 / hit rate = 46%
 # hash-table stats:
-# Load=42/8192=1%, Rehash=0, Collisions=0/79=0%
-# Finished Make data base on Thu Dec 11 21:36:17 2025
+# Load=40/8192=0%, Rehash=0, Collisions=0/75=0%
+# Finished Make data base on Fri Dec 19 14:19:53 2025
 
  
