@@ -1,130 +1,216 @@
 /**
  * parser.c
  * Parsers for use in timeflow
- * 
+ *
  * Author : github.com/prakashniroula-dev
  */
 
-#include <stdbool.h>
 #include <parser.h>
-#include <types.h>
-#include <stdlib.h>
+#include <tf_types.h>
 #include <string.h>
-#include <stdio.h>
+#include <stdlib.h>
+#include <tf_io.h>
 
-static inline int _imax(int a, int b) {
-  return a > b ? a: b;
-}
+static const char *tfp_token_type_name(enum tfp_token_types type);
 
-static inline int _imin(int a, int b) {
-  return a < b ? a: b;
-}
-
-/* Development phase */
-
-bool parse_int(const char* str, int length, int* store) {
-  int value = 0;
-  int sgn = 1;
-  bool parsable = true;
-  for ( int i = 0; i < length; i++ ) {
-    char c = str[i];
-    if ( c == '-' && i == 0 ) {
-      sgn = -1;
-      parsable = false; // to prevent empty "-" being parsed
-      continue;
-    } else if (!(c >= '0' && c <= '9')) {
-      return false;
-    }
-    parsable = true;
-    value *= 10;
-    value += c - '0';
+static uint8_t tfp_parse_time__hr(unsigned long hr) {
+  if ( hr > 23 ) {
+    tf_print_warn("hr > 23 is not allowed, falling back to 0\n");
+    hr = 0;
   }
-  if (!parsable) return false;
-  *store = sgn * value;
-  return parsable;
+  return (uint8_t)hr;
 }
 
-void _rm_all_spaces(char* read) {
-  char* write = read;
-  while (*read) {
-    if (*read != ' ') {
-      *write++ = *read;
-    }
-    read++;
+static uint8_t tfp_parse_time__min(unsigned long min) {
+  if ( min > 59 ) {
+    tf_print_warn("min > 59 is not allowed, falling back to 0\n");
+    min = 0;
   }
-  *write = '\0';
+  return (uint8_t)min;
 }
 
-bool parse_point_time(const char* str, struct tf_clock* t, int length) {
+struct tf_atm tfp_parse_time_dur(const char **ptr, bool *errptr)
+{
+  struct tfp_token tok;
+  struct tf_atm t_atm = {0};
 
-  // only possible lengths are 4 & 5, quick filtering
-  if (length != 4 && length != 5) return false;
+  if (!tfp_expect(ptr, tfp_tok_unsigned, &tok, errptr)) return t_atm;
+
+  if (tfp_match(ptr, tfp_tok_timedur_h, NULL)) {
+    t_atm.clock.h = tfp_parse_time__hr(tok.data._unsigned);
+    if (!tfp_match(ptr, tfp_tok_unsigned, &tok)) return t_atm;
+  }
+
+  if (!tfp_expect(ptr, tfp_tok_timedur_m, &tok, errptr)) return t_atm;
+
+  t_atm.clock.m = tfp_parse_time__min(tok.data._unsigned);
+  return t_atm;
+}
+
+struct tf_atm tfp_parse_time_atm(const char **ptr, bool *errptr)
+{
+  struct tfp_token tok;
+  struct tf_atm t_atm = {0};
+
+  if (!tfp_expect(ptr, tfp_tok_unsigned, &tok, errptr)) return t_atm;
+
+  t_atm.clock.h = tfp_parse_time__hr(tok.data._unsigned);
   
-  char* ptr = strchr(str, ':');
-  if (ptr == NULL) return false;
-
-  int hr = 0, min = 0;
-  if (!parse_int(str, ptr - str, &hr)) return false;
-  if (!parse_int(ptr+1, 2, &min)) return false;
-
-  // validate range
-  if (hr < 0 || hr >= 24 || min < 0 || min >= 60) return false;
+  // expect a colon in between
+  if (!tfp_expect(ptr, tfp_tok_colon, &tok, errptr)) return t_atm;
   
-  t->h = hr;
-  t->m = min;
+  tfp_skip_whitespace(ptr);
+  bool single_digit = **ptr == '0';
+  
+  if (!tfp_expect(ptr, tfp_tok_unsigned, &tok, errptr)) return t_atm;
 
+  t_atm.clock.m = tfp_parse_time__min(tok.data._unsigned);
+
+  if (!single_digit && t_atm.clock.m < 10) {
+    if (errptr) {
+      *errptr = true;
+    } else {
+      tf_print_warn("minutes should be 2 digits");
+    }
+  }
+
+  return t_atm;
+}
+
+bool tfp_match(const char **ptr, enum tfp_token_types type, struct tfp_token *dest)
+{
+  const char* start = *ptr;
+  struct tfp_token tok = tfp_next_token(ptr);
+  if (tok.type != type) {
+    *ptr = start;
+    return false;
+  }
+  if ( dest ) {
+    *dest = tok;
+  }
   return true;
 }
 
-/**
-  ## Parses time in the following format
-  ( ? = entirely optional, ?(xx) = optional, default = xx if omitted)
+bool tfp_expect(const char **ptr, enum tfp_token_types type, struct tfp_token *dest, bool* errptr)
+{
+  const char *start = *ptr;
 
-  - Absolute time : `h?h:mm`, `h?h:mm - h?h:mm`
-  
-  - Special time : `now`, `now - hh:mm`, `hh:mm - now`, `full (all day)`
+  struct tfp_token tok = tfp_next_token(ptr);
 
-  - Dynamic time : `hh:mm ...`, `... hh:mm`
-  
-  - With duration : `... <TimeDuration>`, `<TimeDuration> ...`, `<Time?(now)> +/- <TimeDuration>`
+  if (tok.type == type)
+  {
+    if ( dest ) {
+      *dest = tok;
+    }
+    return true;
+  }
 
- * Any spaces will be stripped off before parsing
- * 
- * @param inputStr String to parse
- * @param t Destination pointer
- * 
- * @returns true on success, false on failure
- */
-bool parse_time(const char* inputStr, tf_time* t) {
-  struct tf_atm start = {0};
-  struct tf_atm end = {0};
-  bool parsable = true;
-  
-  unsigned length = (unsigned) strlen(inputStr) + 1;
-  
-  char* str = calloc(sizeof *str, length);
-  if (str == NULL) {
-    fprintf(stderr, "\ncritical : `parse_time` cannot allocate memory!\n");
+  const char *end = *ptr;
+
+  *ptr = start;
+  if (errptr) {
+    *errptr = false;
     return false;
   }
-  strcpy(str, inputStr);
-  _rm_all_spaces(str);
-  
-  length = strlen(str);
-  parsable &= parse_point_time(str, &start.clock, _imin(length, 5)); // maximum length = "00:00" = 5
 
-  end = start; // for point-times, end is same as start
+  const char *tr = strlen(start) > 10 ? "..." : "";
 
-  if ( parsable && length > 5 ) {
-    unsigned pos = str[4] == '-' ? 5: str[5] == '-' ? 6: 0; // skip one position
-    parsable &= pos ? parse_point_time(str + pos, &end.clock, length - pos): false;
+  if (tok.type == tfp_tok_invalid)
+  {
+    tf_print_err("Parse error - %s\n\tat `%.10s%s`\n\t    ^", tok.data._string, start, tr);
+
+    // print '~' upto where it's parsed
+    {
+      size_t l = (end - start);
+      l = l > 10 ? 10 : l;
+      while (l--)
+        putchar('~');
+    }
+
+    putchar('\n');
+    return false;
   }
 
-  free(str);
-  
-  if (!parsable) return false;
-  
-  t->start = start;
-  t->end = end;
-  return parsable;
+  const char *expected = tfp_token_type_name(type);
+  const char *got = tfp_token_type_name(tok.type);
+  tf_print_err(
+      "Token mismatch - Expected `%s`, got `%s`\n\tat `%.10s%s`\n\t    ^",
+      expected, got, start, tr);
+
+  // print '~' upto where it's parsed
+  {
+    size_t l = (*ptr - start);
+    l = l > 10 ? 10 : l;
+    while (l--)
+      putchar('~');
+  }
+
+  putchar('\n');
+  return false;
+}
+
+static const char *tfp_token_type_name(enum tfp_token_types type)
+{
+  switch (type)
+  {
+  case tfp_tok_invalid:
+    return "invalid token";
+  case tfp_tok_eof:
+    return "end of file";
+  case tfp_tok_unsigned:
+    return "positive integer";
+  case tfp_tok_integer:
+    return "integer";
+  case tfp_tok_string:
+    return "string";
+  case tfp_tok_minus:
+    return "(-)";
+  case tfp_tok_plus:
+    return "(+)";
+  case tfp_tok_now:
+    return "\"now\"";
+  case tfp_tok_allday:
+    return "\"all day\"";
+  case tfp_tok_colon:
+    return "(:)";
+  case tfp_tok_timedur_h:
+    return "\'h\'";
+  case tfp_tok_timedur_m:
+    return "\'m\'";
+  case tfp_tok_ellipses:
+    return "(...)";
+  case tfp_tok_today:
+    return "\"today\"";
+  case tfp_tok_tomorrow:
+    return "\"tomorrow\"";
+  case tfp_tok_yesterday:
+    return "\"yesterday\"";
+  case tfp_tok_literal_day:
+    return "\"day\"";
+  case tfp_tok_literal_week:
+    return "\"week\"";
+  case tfp_tok_literal_month:
+    return "\"month\"";
+  case tfp_tok_literal_year:
+    return "\"year\"";
+  case tfp_tok_fw_slash:
+    return "(/)";
+  case tfp_tok_dayname:
+    return "day (sun/mon/../sat)";
+  case tfp_tok_datedur_d:
+    return "\'d\'";
+  case tfp_tok_datedur_m:
+    return "\'mo\'";
+  case tfp_tok_datedur_y:
+    return "\'y\'";
+  case tfp_tok_datedur_w:
+    return "\'w\'";
+  case tfp_tok_taskview_quick:
+    return "\"current\" | \"prev\" | \"next\"";
+  case tfp_tok_taskview:
+    return "\"task <date>\"";
+  default:
+    break;
+  }
+  return "\?\?<unknown token>\?\?";
 }
