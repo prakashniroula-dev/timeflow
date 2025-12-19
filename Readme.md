@@ -1,12 +1,14 @@
 # TimeFlow
+
 A simple cli task scheduler made for personal use
 
 purely in C !
 
 ## Background
+
 My schedules are very unique from the other
 common ones like list of time and tasks
-I have blocks of time that adjust to whatever 
+I have blocks of time that adjust to whatever
 time space is available, sometimes they may strech
 
 Although I could probably do with some
@@ -17,39 +19,63 @@ You may also like the way I schedule my time,
 who knows !
 
 ## How to install
+
 First, clone this repo
+
 ```
-$ git clone https://github.com/prakash-niroula/repo
+git clone https://github.com/prakashniroula-dev/timeflow
 ```
-Then run this command to build the executable
+
+Then, build the executable by :
+
 ```
-$ make all
+make all
 ```
+
+OR if ( mingw32 on windows)
+
+```
+mingw32-make all
+```
+
 and... that's it !
 
 ## Types
 
 ### 1. `<Date>`
+
 * `today` = Today
 * `tomorrow` = Tomorrow
 * `yesterday` = Yesterday
 * `<day>` = sunday, monday, ... OR sun, mon, ...
-* `<month_name>/<date>` = specific month & day<br> 
+* `<month_name>/<date>` = specific month & day <br/>
   (e.g. Dec/09)
 * `<year>/<month>/<date>` = specific date
+* `<Date?>/day` = recur everyday (if Date is omitted, today is used)
+* `<Date?>/week` = recur every week (if Date is omitted, today is used)
+* `<Date?>/month` = recur every month (if Date is omitted, today is used)
+* `<Date?>/year` = recur every year (if Date is omitted, today is used)
+* `<Date?>/<DateDuration>` = recur every `<duration>` (if Date is omitted, today is used)
 * `<Date?> + <DateDuration>` = given date plus duration.
   if date is omitted, "today" is used
 * `<Date?> - <DateDuration>` = given date minus duration.
   if date is omitted, "today" is used
 
-
 ### 2. `<DateDuration>`
-Format = `<year?>y` `<month>m` `<date>d`
 
-Examples
-`2y 2m 15d`, `1y`, `5d`
+Format = `<number>y` `<number>m` `<number>d` | `<number>w`
+
+Special durations
+
+Examples :
+
+* `2y 2m 15d` = 2 years, 2 months, 15 days
+* `1y` = 1 year
+* `5d` = 5 days
+* `6w` = 6 weeks
 
 ### 3. `<Time>`
+
 * `hh:mm` = point of time
 * `hh:mm - hh:mm` = start time to end time
 * `now` = current time
@@ -57,17 +83,16 @@ Examples
 * `hh:mm - now` = given time to current time
 * `hh:mm ...` = given time to next block start time
 * `... hh:mm` = previous block end time to given time
-* `... <TimeDuration>` = previous block end time + 
+* `... <TimeDuration>` = previous block end time +
   duration
-* `<TimeDuration> ...` = previous block end time - 
-  duration
-* `full` = all day
+* `allday` = all day
 * `<Time?> + <TimeDuration>` = given time plus duration.
   if time is omitted, "now" is used.
 * `<Time?> - <TimeDuration>` = given time minus duration.
   if time is omitted, "now" is used.
 
 ### 4. `<TimeDuration>`
+
 Format = `<hours?>h` `<minutes>m`
 
 Examples
@@ -76,6 +101,7 @@ Examples
 ## Viewing Tasks
 
 Supports 8 formats :
+
 * `list <Date?> <styled?>` = lists the tasks in a list view.
   * `<Date?>` = optional, if omitted, today is used
   * `<styled?>` = optional, if used, differentiates
@@ -118,6 +144,7 @@ Supports 8 formats :
     * `~` = if all of the tasks are unimportant
 
 Examples :
+
 ```
 $ timeflow list
 
@@ -242,18 +269,11 @@ Input :
 * `Desc` = Description ( can be left empty )
 * `Time` = as a type of `<Time>`
 * `Subtasks?` = you can add subtasks within a task
-* `Recurring?` = if required, one of these options
-  * `daily` = recurrs everyday
-  * `weekly` = recurrs every week on the same day
-  * `monthly` = recurrs every month on the same date
-  * `yearly` = recurrs every year, same month & date
-  * `workdays` = recurrs every work-day on given time (configurable)
-  * `holidays` = recurrs every holiday on given time (configurable)
 
 Examples :
 
 ```
-$ timeflow add
+$ timeflow add /week
 
 Task = Task 1
 Desc = Task 1 rules the world
@@ -263,12 +283,6 @@ Time = 9:00 - 11:23
 - subtask1
 - subtask2
 - (...)
-
-(y/n) Recurring? y
-1. daily
-2. weekly
-3. monthly
-4. yearly
 
 5. workdays
 6. holidays
@@ -285,21 +299,20 @@ Desc = Relax & Enjoy
 Time = 11:23 - 15:23
 
 (y/n) Subtasks? n
-(y/n) Recurring? n
 
 Task `Task 1` created for next thursday...
 ```
 
 ```
-$ timeflow add Dec/09
+$ timeflow add Dec/09/month
 
 Task = Special
 Desc = Dec 9th is a special day
-Time = full
+Time = allday
 
 (y/n) Subtasks? n
 
-Task `Special` created for Dec/09...
+Task `Special` created for Dec/09 recurring every month...
 ```
 
 ```
@@ -307,7 +320,7 @@ $ timeflow add 2025/12/09
 
 Task = Very specific date
 Desc = Very very specific date
-Time = full
+Time = allday
 
 (y/n) Subtasks? n
 
