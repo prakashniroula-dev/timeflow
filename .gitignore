@@ -1,4 +1,4 @@
-./build/**
+build/
 *.exe
-./obj/**
-./test.c
+obj/
+test.c
