@@ -123,7 +123,7 @@ bool tfp_expect(const char **ptr, enum tfp_token_types type, struct tfp_token *d
     {
       size_t l = (end - start);
       l = l > 10 ? 10 : l;
-      while (l--)
+      while (--l)
         putchar('~');
     }
 
@@ -134,14 +134,14 @@ bool tfp_expect(const char **ptr, enum tfp_token_types type, struct tfp_token *d
   const char *expected = tfp_token_type_name(type);
   const char *got = tfp_token_type_name(tok.type);
   tf_print_err(
-      "Token mismatch - Expected `%s`, got `%s`\n\tat `%.10s%s`\n\t    ^",
+      "Token mismatch - Expected %s, got %s\n\tat `%.10s%s`\n\t    ^",
       expected, got, start, tr);
 
   // print '~' upto where it's parsed
   {
-    size_t l = (*ptr - start);
+    size_t l = (end - start);
     l = l > 10 ? 10 : l;
-    while (l--)
+    while (--l)
       putchar('~');
   }
 
@@ -164,15 +164,15 @@ static const char *tfp_token_type_name(enum tfp_token_types type)
   case tfp_tok_string:
     return "string";
   case tfp_tok_minus:
-    return "(-)";
+    return "-";
   case tfp_tok_plus:
-    return "(+)";
+    return "+";
   case tfp_tok_now:
     return "\"now\"";
   case tfp_tok_allday:
     return "\"all day\"";
   case tfp_tok_colon:
-    return "(:)";
+    return ":";
   case tfp_tok_timedur_h:
     return "\'h\'";
   case tfp_tok_timedur_m:
@@ -194,7 +194,7 @@ static const char *tfp_token_type_name(enum tfp_token_types type)
   case tfp_tok_literal_year:
     return "\"year\"";
   case tfp_tok_fw_slash:
-    return "(/)";
+    return "/";
   case tfp_tok_dayname:
     return "day (sun/mon/../sat)";
   case tfp_tok_datedur_d:
