@@ -12,8 +12,9 @@
 #include <stdio.h>
 
 static inline void test_parser() {
-  const char* str = "25:45";
+  const char* str = "5:00 + 16 hr 50 min";
   const char* ptr = str;
-  struct tf_atm t = tfp_parse_time_atm(&ptr, NULL);
-  printf("%d:%02d", t.clock.h, t.clock.m);
+  tf_time t = tfp_parse_time(&ptr, NULL);
+  printf("%02d:%02d\n", t.start.clock.h, t.start.clock.m);
+  printf("%02d:%02d", t.end.clock.h, t.end.clock.m);
 }

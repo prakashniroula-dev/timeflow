@@ -106,10 +106,10 @@ struct tfp_token tfp_lex_keyword(const char **ptr)
   if (tfpm_match_str(start, len, "allday"))
     return tfpm_tok_type(tfp_tok_allday);
 
-  if (tfpm_match_str(start, len, "h"))
+  if (tfpm_match_str(start, len, "h") || tfpm_match_str(start, len, "hr"))
     return tfpm_tok_type(tfp_tok_timedur_h);
 
-  if (tfpm_match_str(start, len, "m"))
+  if (tfpm_match_str(start, len, "m") || tfpm_match_str(start, len, "min"))
     return tfpm_tok_type(tfp_tok_timedur_m);
 
   // Date keywords

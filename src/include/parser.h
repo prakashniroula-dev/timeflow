@@ -11,6 +11,7 @@ enum tfp_token_types
 {
   /* Basic */
   
+  tfp_tok_dummy = -2,
   tfp_tok_eof = -1,
   tfp_tok_invalid = 0,
   
@@ -88,6 +89,7 @@ bool tfp_match(const char** ptr, enum tfp_token_types type, struct tfp_token* de
 
 /* Parsers */
 struct tf_atm tfp_parse_time_atm(const char** ptr, bool* err_ptr);
+struct tf_atm tfp_parse_time_atm_basic(const char** ptr, bool* err_ptr);
 struct tf_atm tfp_parse_time_dur(const char** ptr, bool* err_ptr);
 tf_time tfp_parse_time(const char** ptr, bool* err_ptr);
 

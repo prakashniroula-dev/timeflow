@@ -83,8 +83,8 @@ Examples :
 * `hh:mm - now` = given time to current time
 * `hh:mm ...` = given time to next block start time
 * `... hh:mm` = previous block end time to given time
-* `... <TimeDuration>` = previous block end time +
-  duration
+* `... + <TimeDuration>` = latest block end + duration
+* `... - <TimeDuration>` = latest block start - duration
 * `allday` = all day
 * `<Time?> + <TimeDuration>` = given time plus duration.
   if time is omitted, "now" is used.
