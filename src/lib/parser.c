@@ -37,24 +37,26 @@ static void tfp_expect_raise_err(bool *errptr, const char* ptr, enum tfp_token_t
   putchar('\n');
 }
 
-static uint8_t tfp_parse_time__hr(unsigned long hr)
+static uint8_t tfp_parse_time__hr(unsigned long hr, bool* errptr)
 {
-  if (hr > 23)
-  {
+  if (hr < 24) return (uint8_t) hr;
+  if ( errptr ) {
+    *errptr = true;
+  } else {
     tf_print_warn("hr > 23 is not allowed, falling back to 0\n");
-    hr = 0;
   }
-  return (uint8_t)hr;
+  return 0;
 }
 
-static uint8_t tfp_parse_time__min(unsigned long min)
+static uint8_t tfp_parse_time__min(unsigned long min, bool* errptr)
 {
-  if (min > 59)
-  {
+  if (min < 60) return (uint8_t) min;
+  if ( errptr ) {
+    *errptr = true;
+  } else {
     tf_print_warn("min > 59 is not allowed, falling back to 0\n");
-    min = 0;
   }
-  return (uint8_t)min;
+  return 0;
 }
 
 struct tf_atm tfp_parse_time_atm(const char** ptr, bool *errptr)
@@ -217,7 +219,7 @@ struct tf_atm tfp_parse_time_dur(const char **ptr, bool *errptr)
 
   if (tfp_match(ptr, tfp_tok_timedur_h, NULL))
   {
-    t_atm.clock.h = tfp_parse_time__hr(tok.data._unsigned);
+    t_atm.clock.h = tfp_parse_time__hr(tok.data._unsigned, errptr);
     if (!tfp_match(ptr, tfp_tok_unsigned, &tok))
       return t_atm;
   }
@@ -225,7 +227,7 @@ struct tf_atm tfp_parse_time_dur(const char **ptr, bool *errptr)
   if (!tfp_expect(ptr, tfp_tok_timedur_m, NULL, errptr))
     return t_atm;
 
-  t_atm.clock.m = tfp_parse_time__min(tok.data._unsigned);
+  t_atm.clock.m = tfp_parse_time__min(tok.data._unsigned, errptr);
   return t_atm;
 }
 
@@ -237,7 +239,7 @@ struct tf_atm tfp_parse_time_atm_basic(const char **ptr, bool *errptr)
   if (!tfp_expect(ptr, tfp_tok_unsigned, &tok, errptr))
     return t_atm;
 
-  t_atm.clock.h = tfp_parse_time__hr(tok.data._unsigned);
+  t_atm.clock.h = tfp_parse_time__hr(tok.data._unsigned, errptr);
 
   // expect a colon in between
   if (!tfp_expect(ptr, tfp_tok_colon, &tok, errptr))
@@ -249,7 +251,7 @@ struct tf_atm tfp_parse_time_atm_basic(const char **ptr, bool *errptr)
   if (!tfp_expect(ptr, tfp_tok_unsigned, &tok, errptr))
     return t_atm;
 
-  t_atm.clock.m = tfp_parse_time__min(tok.data._unsigned);
+  t_atm.clock.m = tfp_parse_time__min(tok.data._unsigned, errptr);
 
   if (!single_digit && t_atm.clock.m < 10)
   {
