@@ -32,7 +32,7 @@ struct tfp_token tfp_next_token(const char **ptr)
   if (c == '\0')
     return tfpm_tok_type(tfp_tok_eof);
 
-  if (isdigit(c) || (c == '-' && isdigit((unsigned char)*(*ptr+1))))
+  if (isdigit(c))
     return tfp_lex_number(ptr);
   
   if (isalpha(c))

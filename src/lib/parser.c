@@ -64,7 +64,8 @@ struct tf_atm tfp_parse_time_atm(const char** ptr, bool *errptr)
   const char* p = *ptr;
 
   // start with a number is always atm-time
-  if (tfp_match(&p, tfp_tok_unsigned, &tok)) {
+  if (tfp_match(ptr, tfp_tok_unsigned, &tok)) {
+    *ptr = p;
     t = tfp_parse_time_atm_basic(ptr, errptr);
     return t;
   }
@@ -92,20 +93,20 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   struct tfp_token tok;
   struct tf_atm t_atm = {0};
   struct tf_atm t_dur = {0};
-  const char* p = *ptr;
+  const char* start = *ptr;
   tf_time t = {0};
 
   bool err = false;
   // start time
-  t_atm = tfp_parse_time_atm(&p, &err);
+  t_atm = tfp_parse_time_atm(ptr, &err);
   if (err) {
+    *ptr = start;
     tfp_expect_raise_err(
       errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy, strlen(*ptr),
       "Invalid format"
     );
     return t;
   }
-  *ptr = p;
   
   t.start = t_atm;
   
@@ -114,43 +115,46 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   
   // looking for operator
   // match `-`
+  start = *ptr;
   if ( tfp_match(ptr, tfp_tok_minus, &tok) ) {
-    p = *ptr;
-    t_atm = tfp_parse_time_atm(&p, &err);
+    t_atm = tfp_parse_time_atm(ptr, &err);
     // if matched normal atm_time with no error,
     // then expect eof
     if (!err) {
-      tfp_expect(&p, tfp_tok_eof, NULL, errptr);
+      tfp_expect(ptr, tfp_tok_eof, NULL, errptr);
       if (errptr && *errptr) return t;
       t.end = t_atm;
-      *ptr = p;
       return t;
     };
-    p = *ptr;
+    *ptr = start;
     err = false;
     
     // if err, try to match duration
-    t_dur = tfp_parse_time_dur(&p, &err);
+    t_dur = tfp_parse_time_dur(ptr, &err);
     if (err) {
+      *ptr = start;
       tfp_expect_raise_err(
         errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy, strlen(*ptr),
         "Expected either time or duration after `-`"
       );
       return t;
     } else {
-      tfp_expect(&p, tfp_tok_eof, NULL, errptr);
-      if (errptr && *errptr) return t;
+      tfp_expect(ptr, tfp_tok_eof, NULL, errptr);
+      if (errptr && *errptr) {
+        *ptr = start;
+        return t;
+      };
     }
     uint8_t m = t.start.clock.m;
     uint8_t h = t.start.clock.h;
     if ( t_dur.clock.h > h || (t_dur.clock.m > m && h == 0) ) {
+      *ptr = start;
       tfp_expect_raise_err(
         errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy,
         strlen(*ptr), "Invalid operation, out of bounds"
       );
       return t;
     }
-    *ptr = p;
     if ( t_dur.clock.m > m ) {
       m += 60;
       h -= 1;
@@ -163,9 +167,11 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   }
   // match `+`
   else if ( tfp_match(ptr, tfp_tok_plus, &tok) ) {
-    p = *ptr;
-    t_dur = tfp_parse_time_dur(&p, errptr);
-    if (errptr && *errptr) return t;
+    t_dur = tfp_parse_time_dur(ptr, errptr);
+    if (errptr && *errptr) {
+      *ptr = start;
+      return t;
+    };
     uint8_t h = t.start.clock.h;
     uint8_t m = t.start.clock.m;
     m += t_dur.clock.m;
@@ -173,16 +179,19 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     m %= 60;
     h += t_dur.clock.h;
     if ( h > 23 ) {
+      *ptr = start;
       tfp_expect_raise_err(
         errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy,
         strlen(*ptr), "Invalid operation, out of bounds"
       );
       return t;
     } else {
-      tfp_expect(&p, tfp_tok_eof, NULL, errptr);
-      if (errptr && *errptr) return t;
+      tfp_expect(ptr, tfp_tok_eof, NULL, errptr);
+      if (errptr && *errptr) {
+        *ptr = start;
+        return t;
+      };
     }
-    *ptr = p;
     t.end.clock.h = h;
     t.end.clock.m = m;
     return t;
@@ -190,6 +199,7 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   // to-do
   // else if ( tfp_match(ptr, tfp_tok_ellipses) ) {
   // }
+  *ptr = start;
   tfp_expect_raise_err(
     errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy,
     strlen(*ptr), "Invalid format"
