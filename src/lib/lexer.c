@@ -59,7 +59,7 @@ struct tfp_token tfp_lex_number(const char **ptr)
    return (struct tfp_token) {tfp_tok_invalid, .data._string = "Number overflow"};
 
   if (*ptr == rp)
-    return (struct tfp_token) {tfp_tok_invalid, .data._string = "Digit not present when expected.."};
+    return (struct tfp_token) {tfp_tok_invalid, .data._string = "Digit not present when expected"};
 
   *ptr = rp;
   return tok;
