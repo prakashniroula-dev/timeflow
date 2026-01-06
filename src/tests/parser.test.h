@@ -10,11 +10,12 @@
 #include <parser.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <tf_io.h>
 
 static inline void test_parser() {
-  const char* str = "5:00 + 16 hr 50 min";
+  const char* str = "5:58 + 16 hr 49 min";
   const char* ptr = str;
   tf_time t = tfp_parse_time(&ptr, NULL);
-  printf("%02d:%02d\n", t.start.clock.h, t.start.clock.m);
-  printf("%02d:%02d", t.end.clock.h, t.end.clock.m);
+  tf_print("%02d:%02d\n", t.start.clock.h, t.start.clock.m);
+  tf_print("%02d:%02d", t.end.clock.h, t.end.clock.m);
 }
