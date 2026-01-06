@@ -1,5 +1,5 @@
-#if !defined(TIMEFLOW_PARSER_TYPES_H)
-#define TIMEFLOW_PARSER_TYPES_H
+#if !defined(TIMEFLOW_PARSER_H)
+#define TIMEFLOW_PARSER_H
 
 #include <tf_types.h>
 #include <stdlib.h>
@@ -93,4 +93,4 @@ struct tf_atm tfp_parse_time_atm_basic(const char** ptr, bool* err_ptr);
 struct tf_atm tfp_parse_time_dur(const char** ptr, bool* err_ptr);
 tf_time tfp_parse_time(const char** ptr, bool* err_ptr);
 
-#endif // TIMEFLOW_PARSER_TYPES_H
+#endif // TIMEFLOW_PARSER_H
