@@ -19,6 +19,7 @@ void tf_print_time(tf_time t) {
   enum tf_enum s_typ = t.start.type;
   enum tf_enum e_typ = t.end.type;
   printf("%d. Time = ", _count);
+
   if ( s_typ == tf_time_absolute )
     printf("%02d:%02d ", t.start.clock.h, t.start.clock.m);
   else if (s_typ == tf_dtime_prev)
@@ -36,6 +37,7 @@ void tf_print_time(tf_time t) {
   else if (e_typ == tf_dtime_minus_dur)
     printf("- %dhr %dmin", t.end.clock.h, t.end.clock.m);
   else if (e_typ == tf_time_null);
+  else if (s_typ == tf_time_invalid && e_typ == tf_time_invalid);
   else
     printf("<invalid>");
 
