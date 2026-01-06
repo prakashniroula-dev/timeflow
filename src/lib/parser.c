@@ -120,6 +120,12 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     return t;
   }
 
+  // if eof, then it's a point time, so set end to null
+  if (!err && tfp_match(ptr, tfp_tok_eof, NULL)) {
+    t.end.type = tf_time_null;
+    return t;
+  }
+
   // first ellipses = dynamic prev time
   if ( tok.type == tfp_tok_ellipses ) {
     t_atm.type = tf_dtime_prev;
@@ -129,12 +135,6 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   
   // reset error just in case
   err = false;
-
-  // if eof, then it's a point time, so set end to null
-  if (tfp_match(ptr, tfp_tok_eof, NULL)) {
-    t.end.type = tf_time_null;
-    return t;
-  }
   
   // looking for operator
   // match `-`
