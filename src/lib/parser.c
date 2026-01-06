@@ -119,30 +119,36 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     );
     return t;
   }
-
+  t.start = t_atm;
+  
   // if eof, then it's a point time, so set end to null
   if (!err && tfp_match(ptr, tfp_tok_eof, NULL)) {
     t.end.type = tf_time_null;
     return t;
   }
 
+  // reset error
+  err = false;
+  
+
+  
   // first ellipses = dynamic prev time
   // if first is ellipses, next time can be directly supplied
   // so check for that too
   if ( tok.type == tfp_tok_ellipses ) {
-    t_atm.type = tf_dtime_prev;
+    t.start.type = tf_dtime_prev; // dynamic time
     start = *ptr;
     t_atm = tfp_parse_time_atm(ptr, &err);
     if ( !err ) {
       t.end = t_atm;
       return t;
     }
+    // reset error
+    err = false;
     *ptr = start;
   }
   
-  t.start = t_atm;
-  
-  // reset error
+  // reset error just in case
   err = false;
   
   // looking for operator
@@ -150,9 +156,16 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   start = *ptr;
   if ( tfp_match(ptr, tfp_tok_minus, &tok) ) {
     start = *ptr;
+
+    // try matching ellipses to allow dynamic time (alt-format)
+    if ( tfp_match(ptr, tfp_tok_ellipses, NULL) ) {
+      if (!tfp_expect(ptr, tfp_tok_eof, NULL, errptr)) return t;
+      t.end.type = tf_dtime_next;
+      return t;
+    }
+
     t_atm = tfp_parse_time_atm(ptr, &err);
-    // if matched normal atm_time with no error,
-    // then expect eof
+    // if matched normal atm_time with no error, then expect eof
     if (!err) {
       if(!tfp_expect(ptr, tfp_tok_eof, NULL, errptr)) return t;
       t.end = t_atm;
