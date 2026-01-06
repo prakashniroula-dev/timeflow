@@ -127,13 +127,22 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
   }
 
   // first ellipses = dynamic prev time
+  // if first is ellipses, next time can be directly supplied
+  // so check for that too
   if ( tok.type == tfp_tok_ellipses ) {
     t_atm.type = tf_dtime_prev;
+    start = *ptr;
+    t_atm = tfp_parse_time_atm(ptr, &err);
+    if ( !err ) {
+      t.end = t_atm;
+      return t;
+    }
+    *ptr = start;
   }
   
   t.start = t_atm;
   
-  // reset error just in case
+  // reset error
   err = false;
   
   // looking for operator
