@@ -84,13 +84,13 @@ void tfp_skip_whitespace(const char** ptr);
 struct tfp_token tfp_next_token(const char** ptr);
 
 /* Expect / match token type */
-bool tfp_expect(const char** ptr, enum tfp_token_types type, struct tfp_token* dest, bool *errptr);
+bool tfp_expect(const char** ptr, enum tfp_token_types type, struct tfp_token* dest, const char** errptr);
 bool tfp_match(const char** ptr, enum tfp_token_types type, struct tfp_token* dest);
 
 /* Parsers */
-struct tf_atm tfp_parse_time_atm(const char** ptr, bool* err_ptr);
-struct tf_atm tfp_parse_time_atm_basic(const char** ptr, bool* err_ptr);
-struct tf_atm tfp_parse_time_dur(const char** ptr, bool* err_ptr);
-tf_time tfp_parse_time(const char** ptr, bool* err_ptr);
+struct tf_atm tfp_parse_time_atm(const char** ptr, const char** err_ptr);
+struct tf_atm tfp_parse_time_atm_basic(const char** ptr, const char** err_ptr);
+struct tf_atm tfp_parse_time_dur(const char** ptr, const char** err_ptr);
+tf_time tfp_parse_time(const char** ptr, const char** err_ptr);
 
 #endif // TIMEFLOW_PARSER_H

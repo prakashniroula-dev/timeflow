@@ -18,6 +18,7 @@ struct tf_clock {
 };
 
 enum tf_enum {
+  tf_time_invalid = -1,
   tf_time_absolute = 0, // absolute time = hh:mm
   tf_time_null,
   // dtime = dynamic time (... blocks)

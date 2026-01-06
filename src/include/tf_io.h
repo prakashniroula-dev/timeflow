@@ -5,6 +5,10 @@
 
 #define tf_print_err(...) fprintf(stderr, "[tf error]: " __VA_ARGS__)
 #define tf_print_warn(...) fprintf(stderr, "[tf warn]: " __VA_ARGS__)
+
+#define tf_sprint_err(s, n, ...) snprintf(s, n, "[tf error]: " __VA_ARGS__)
+#define tf_sprint_warn(s, n, ...) snprintf(s, n, "[tf warn]: " __VA_ARGS__)
+
 #define tf_log(...) fprintf(stderr, "[tf log]: " __VA_ARGS__)
 #define tf_print(...) fprintf(stdout, "[tf]: " __VA_ARGS__)
 
