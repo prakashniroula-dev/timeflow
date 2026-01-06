@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <tf_io.h>
+#include <time.h>
 
 static const char *tfp_token_type_name(enum tfp_token_types type);
 
@@ -65,7 +66,7 @@ struct tf_atm tfp_parse_time_atm(const char** ptr, bool *errptr)
   struct tfp_token tok;
   const char* p = *ptr;
 
-  // start with a number is always atm-time
+  // start with a number is always atm-time (basic absolute time)
   if (tfp_match(ptr, tfp_tok_unsigned, &tok)) {
     *ptr = p;
     t = tfp_parse_time_atm_basic(ptr, errptr);
@@ -73,14 +74,15 @@ struct tf_atm tfp_parse_time_atm(const char** ptr, bool *errptr)
   }
   // special keyword : now, hardcode for now!
   else if ( tfp_match(ptr, tfp_tok_now, &tok)) {
-    t.clock.h = 21;
-    t.clock.m = 5;
+    time_t t_raw;
+    struct tm *t_loc;
+    time(&t_raw);
+    t_loc = localtime(&t_raw);
+    // Extract hour and minute as integers
+    t.clock.h = t_loc->tm_hour;
+    t.clock.m = t_loc->tm_min;
     return t;
   }
-  // to-do
-  // else if ( tfp_match(&p, tfp_tok_ellipses, &tok)) {
-  // *ptr = p;
-  // }
   
   if (errptr) {
     *errptr = true;
@@ -92,16 +94,24 @@ struct tf_atm tfp_parse_time_atm(const char** ptr, bool *errptr)
 
 tf_time tfp_parse_time(const char **ptr, bool *errptr)
 {
-  struct tfp_token tok;
+  struct tfp_token tok = {0};
   struct tf_atm t_atm = {0};
   struct tf_atm t_dur = {0};
   const char* start = *ptr;
   tf_time t = {0};
 
+  // check for allday ( complete time )
+  if (tfp_match(ptr, tfp_tok_allday, NULL)) {
+    if (!tfp_expect(ptr, tfp_tok_eof, NULL, errptr)) return t;
+    t.end.clock.h = 23;
+    t.end.clock.m = 59;
+    return t;
+  }
+
   bool err = false;
   // start time
   t_atm = tfp_parse_time_atm(ptr, &err);
-  if (err) {
+  if (err && !(tfp_match(ptr, tfp_tok_ellipses, &tok))) {
     *ptr = start;
     tfp_expect_raise_err(
       errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy, strlen(*ptr),
@@ -109,22 +119,33 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     );
     return t;
   }
+
+  // first ellipses = dynamic prev time
+  if ( tok.type == tfp_tok_ellipses ) {
+    t_atm.type = tf_dtime_prev;
+  }
   
   t.start = t_atm;
   
   // reset error just in case
   err = false;
+
+  // if eof, then it's a point time, so set end to null
+  if (tfp_match(ptr, tfp_tok_eof, NULL)) {
+    t.end.type = tf_time_null;
+    return t;
+  }
   
   // looking for operator
   // match `-`
   start = *ptr;
   if ( tfp_match(ptr, tfp_tok_minus, &tok) ) {
+    start = *ptr;
     t_atm = tfp_parse_time_atm(ptr, &err);
     // if matched normal atm_time with no error,
     // then expect eof
     if (!err) {
-      tfp_expect(ptr, tfp_tok_eof, NULL, errptr);
-      if (errptr && *errptr) return t;
+      if(!tfp_expect(ptr, tfp_tok_eof, NULL, errptr)) return t;
       t.end = t_atm;
       return t;
     };
@@ -141,14 +162,18 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
       );
       return t;
     } else {
-      tfp_expect(ptr, tfp_tok_eof, NULL, errptr);
-      if (errptr && *errptr) {
-        *ptr = start;
-        return t;
-      };
+      if(!tfp_expect(ptr, tfp_tok_eof, NULL, errptr)) return t;
+    }
+    // Account for dynamic times ( case: ... - <duration> )
+    if ( t.start.type == tf_dtime_prev ) {
+      t.end.type = tf_dtime_minus_dur;
+      t.end.clock = t_dur.clock;
+      return t;
     }
     uint8_t m = t.start.clock.m;
     uint8_t h = t.start.clock.h;
+    t.end.clock.h = h;
+    t.end.clock.m = m;
     if ( t_dur.clock.h > h || (t_dur.clock.m > m && h == 0) ) {
       *ptr = start;
       tfp_expect_raise_err(
@@ -163,17 +188,24 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     }
     m -= t_dur.clock.m;
     h -= t_dur.clock.h;
-    t.end.clock.h = h;
-    t.end.clock.m = m;
+    t.start.clock.h = h;
+    t.start.clock.m = m;
     return t;
   }
   // match `+`
   else if ( tfp_match(ptr, tfp_tok_plus, &tok) ) {
+    start = *ptr;
     t_dur = tfp_parse_time_dur(ptr, errptr);
     if (errptr && *errptr) {
       *ptr = start;
       return t;
     };
+    // Account for dynamic times ( case: ... + <duration> )
+    if ( t.start.type == tf_dtime_prev ) {
+      t.end.type = tf_dtime_plus_dur;
+      t.end.clock = t_dur.clock;
+      return t;
+    }
     uint8_t h = t.start.clock.h;
     uint8_t m = t.start.clock.m;
     m += t_dur.clock.m;
@@ -198,9 +230,14 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     t.end.clock.m = m;
     return t;
   }
-  // to-do
-  // else if ( tfp_match(ptr, tfp_tok_ellipses) ) {
-  // }
+  // check for ellipses ( end without middle operator )
+  // indicates to next block's start
+  else if ( tfp_match(ptr, tfp_tok_ellipses, NULL)) {
+    start = *ptr;
+    if (!tfp_expect(ptr, tfp_tok_eof, NULL, errptr)) return t;
+    t.end.type = tf_dtime_next;
+    return t;
+  }
   *ptr = start;
   tfp_expect_raise_err(
     errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy,
