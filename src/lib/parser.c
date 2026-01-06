@@ -196,7 +196,7 @@ tf_time tfp_parse_time(const char **ptr, bool *errptr)
     uint8_t h = t.start.clock.h;
     t.end.clock.h = h;
     t.end.clock.m = m;
-    if ( t_dur.clock.h > h || (t_dur.clock.m > m && h == 0) ) {
+    if ( t_dur.clock.h > h || (t_dur.clock.m > m && h <= t_dur.clock.h) ) {
       *ptr = start;
       tfp_expect_raise_err(
         errptr, *ptr, tfp_tok_dummy, tfp_tok_dummy,
